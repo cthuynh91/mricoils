@@ -1,2 +1,2 @@
-# IsmrmSunrisePython
-For the 2015 ISMRM Nuts &amp; Bolts Educational Course
+# mricoils
+Forked from Phil Beatty's repository for an ISMRM course
