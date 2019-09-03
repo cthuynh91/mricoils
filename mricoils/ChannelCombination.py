@@ -4,6 +4,7 @@ __all__ = ["ComputeChannelCombinationMaps",
 
 import numpy as np
 
+
 def ComputeChannelCombinationMaps(channelSensitivityMaps, noiseMatrix=None):
     """Computes noise-optimal channel combination maps from  coil sensitivity 
     maps and a noise covariance matrix.
@@ -18,7 +19,7 @@ def ComputeChannelCombinationMaps(channelSensitivityMaps, noiseMatrix=None):
 
     Returns
     -------
-    
+
     ccm : (Nx, Ny, Nc) array
         channel combination maps
         The ccm can be applied to channel-by-channel images as
@@ -31,18 +32,18 @@ def ComputeChannelCombinationMaps(channelSensitivityMaps, noiseMatrix=None):
     This Source Code Form is subject to the terms of the Mozilla Public
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
-        
+
     Philip J. Beatty (philip.beatty@gmail.com)
     """
-    
+
     channelDim = channelSensitivityMaps.ndim - 1    
     numChannels = channelSensitivityMaps.shape[channelDim]
-    
-    numElements = channelSensitivityMaps.size / numChannels    
-    
+
+    numElements = int(channelSensitivityMaps.size / numChannels)
+
     if noiseMatrix is None:
         noiseMatrix = np.eye(numChannels)
-    
+
 
     csmMatrix = np.mat(np.reshape(channelSensitivityMaps, [numElements, numChannels], order='F'))
 
@@ -54,13 +55,13 @@ def ComputeChannelCombinationMaps(channelSensitivityMaps, noiseMatrix=None):
     nonzeroScaleCorrection = scaleCorrection[nonzeroInd]
 
     ccm = np.zeros(csmMatrix.shape, dtype=np.complex)
-    
+
     ccm[nonzeroInd, :] = np.array(relativeCcmMatrix[nonzeroInd,:]) / nonzeroScaleCorrection[:, np.newaxis]
 
 
     ccm = np.reshape(ccm, channelSensitivityMaps.shape, order='F');
     return ccm
-    
+
 
 def ComputeRootSumOfSquaresChannelCombination(x, dimIndex=None):
     """Computes root-sum-of-squares along a single dimension.
@@ -119,18 +120,18 @@ def NormalizeShadingToSoS(imIn):
     This Source Code Form is subject to the terms of the Mozilla Public
     License, v. 2.0. If a copy of the MPL was not distributed with this
     file, You can obtain one at http://mozilla.org/MPL/2.0/.
-        
+
     Philip J. Beatty (philip.beatty@gmail.com)    
     """
-    
+
     channelDim = imIn.ndim-1
     numChannels = imIn.shape[channelDim]
-    numElements = imIn.size / numChannels
+    numElements = int(imIn.size / numChannels)
     imShape = list(imIn.shape[0:channelDim])
     imShape.append(1)
-    
+
     imInMatrix = np.reshape(imIn, [numElements, numChannels], order='F')
-    
+
     shadingCorrection = np.sqrt(np.sum(np.abs(imInMatrix)**2, 1))
     nonzeroInd = np.nonzero(shadingCorrection)
 
@@ -140,5 +141,5 @@ def NormalizeShadingToSoS(imIn):
 
     imOut = imIn * correctionImage
     correctionImage = correctionImage.squeeze()
-    
+
     return imOut, correctionImage
